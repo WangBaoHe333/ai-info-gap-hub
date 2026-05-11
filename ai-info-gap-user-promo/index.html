@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #eef7f5;
+        color: #14211f;
+        font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      }
+
+      #root {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 12% 10%, rgba(6, 119, 111, 0.18), rgba(6, 119, 111, 0) 34%),
+          radial-gradient(circle at 88% 86%, rgba(200, 95, 73, 0.16), rgba(200, 95, 73, 0) 30%),
+          #eef7f5;
+      }
+
+      .scene {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #eef7f5;
+        overflow: hidden;
+      }
+
+      .scene-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 112px 82px;
+        gap: 34px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        width: fit-content;
+        padding: 12px 18px;
+        border: 1px solid rgba(24, 54, 51, 0.12);
+        border-radius: 20px;
+        background: rgba(251, 253, 252, 0.82);
+        color: #053f3a;
+        font-size: 26px;
+        font-weight: 900;
+      }
+
+      .mark {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 13px;
+        background: #06776f;
+        color: #ffffff;
+        font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .eyebrow {
+        width: fit-content;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: #dff3ef;
+        color: #06776f;
+        font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2 {
+        max-width: 920px;
+        color: #14211f;
+        font-family: Fraunces, "PingFang SC", "Microsoft YaHei", serif;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.02;
+      }
+
+      h1 {
+        font-size: 112px;
+      }
+
+      h2 {
+        font-size: 92px;
+      }
+
+      .lead {
+        max-width: 850px;
+        color: #435552;
+        font-size: 38px;
+        font-weight: 520;
+        line-height: 1.42;
+      }
+
+      .small-note {
+        max-width: 830px;
+        color: #667571;
+        font-size: 24px;
+        line-height: 1.55;
+      }
+
+      .mock-window,
+      .phone,
+      .answer-card,
+      .source-card {
+        border: 1px solid rgba(24, 54, 51, 0.12);
+        border-radius: 30px;
+        background: rgba(251, 253, 252, 0.88);
+        box-shadow: 0 28px 70px rgba(24, 54, 51, 0.12);
+      }
+
+      .mock-window {
+        display: grid;
+        gap: 20px;
+        padding: 28px;
+      }
+
+      .window-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #667571;
+        font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+        font-size: 18px;
+      }
+
+      .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #c85f49;
+      }
+
+      .dot:nth-child(2) {
+        background: #d6aa45;
+      }
+
+      .dot:nth-child(3) {
+        background: #06776f;
+      }
+
+      .course-list,
+      .steps-grid,
+      .post-stack,
+      .feature-list {
+        display: grid;
+        gap: 16px;
+      }
+
+      .course-row,
+      .step-pill,
+      .post-row,
+      .feature-row {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 16px;
+        padding: 18px 20px;
+        border: 1px solid rgba(24, 54, 51, 0.08);
+        border-radius: 20px;
+        background: #ffffff;
+      }
+
+      .num {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        border-radius: 15px;
+        background: #eef7f5;
+        color: #06776f;
+        font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+        font-size: 22px;
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .course-row strong,
+      .post-row strong,
+      .feature-row strong {
+        color: #14211f;
+        font-size: 28px;
+        line-height: 1.28;
+      }
+
+      .course-row span,
+      .post-row span,
+      .feature-row span {
+        display: block;
+        margin-top: 4px;
+        color: #5e6d69;
+        font-size: 20px;
+        line-height: 1.35;
+      }
+
+      .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .tag {
+        padding: 12px 18px;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #053f3a;
+        font-size: 24px;
+        font-weight: 820;
+        box-shadow: inset 0 0 0 1px rgba(24, 54, 51, 0.09);
+      }
+
+      .tag.hot {
+        background: #fff3ef;
+        color: #8d3929;
+      }
+
+      .post-stack {
+        grid-template-columns: 1fr;
+      }
+
+      .post-row {
+        grid-template-columns: 78px minmax(0, 1fr);
+        padding: 22px;
+      }
+
+      .post-icon {
+        display: grid;
+        width: 64px;
+        height: 64px;
+        place-items: center;
+        border-radius: 20px;
+        background: #06776f;
+        color: #ffffff;
+        font-size: 28px;
+        font-weight: 900;
+      }
+
+      .phone {
+        display: grid;
+        gap: 18px;
+        width: 790px;
+        padding: 26px;
+        border-radius: 42px;
+      }
+
+      .phone-head {
+        display: flex;
+        justify-content: space-between;
+        color: #667571;
+        font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .question {
+        justify-self: end;
+        max-width: 620px;
+        padding: 18px 22px;
+        border-radius: 24px 24px 6px 24px;
+        background: #eef7f5;
+        color: #053f3a;
+        font-size: 28px;
+        font-weight: 850;
+        line-height: 1.35;
+      }
+
+      .answer-card {
+        display: grid;
+        gap: 14px;
+        padding: 24px;
+        box-shadow: none;
+      }
+
+      .answer-card strong {
+        color: #14211f;
+        font-size: 30px;
+      }
+
+      .answer-card p {
+        color: #435552;
+        font-size: 22px;
+        line-height: 1.45;
+      }
+
+      .deepseek-badge {
+        width: fit-content;
+        padding: 9px 13px;
+        border-radius: 999px;
+        background: #14211f;
+        color: #ffffff;
+        font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .feature-list {
+        gap: 18px;
+      }
+
+      .feature-row {
+        grid-template-columns: 56px minmax(0, 1fr);
+      }
+
+      .check {
+        display: grid;
+        width: 46px;
+        height: 46px;
+        place-items: center;
+        border-radius: 14px;
+        background: #dff3ef;
+        color: #06776f;
+        font-size: 24px;
+        font-weight: 900;
+      }
+
+      .cta-card {
+        display: grid;
+        gap: 24px;
+        padding: 46px;
+        border-radius: 38px;
+        background: #14211f;
+        color: #ffffff;
+        box-shadow: 0 36px 90px rgba(20, 33, 31, 0.28);
+      }
+
+      .cta-card h2 {
+        color: #ffffff;
+        font-size: 96px;
+      }
+
+      .cta-card p {
+        color: #d9e7e4;
+        font-size: 34px;
+        line-height: 1.42;
+      }
+
+      .cta-button {
+        width: fit-content;
+        padding: 18px 26px;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #053f3a;
+        font-size: 30px;
+        font-weight: 900;
+      }
+
+      .disclaimer {
+        color: #667571;
+        font-size: 20px;
+        line-height: 1.45;
+      }
+
+      .pattern {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0.9;
+      }
+
+      .ring {
+        position: absolute;
+        border: 1px solid rgba(6, 119, 111, 0.16);
+        border-radius: 50%;
+      }
+
+      .ring.a {
+        right: -160px;
+        top: 120px;
+        width: 520px;
+        height: 520px;
+      }
+
+      .ring.b {
+        left: -230px;
+        bottom: 180px;
+        width: 620px;
+        height: 620px;
+      }
+
+      .line {
+        position: absolute;
+        height: 1px;
+        background: rgba(6, 119, 111, 0.16);
+      }
+
+      .line.one {
+        left: 82px;
+        right: 82px;
+        top: 178px;
+      }
+
+      .line.two {
+        left: 82px;
+        right: 82px;
+        bottom: 168px;
+      }
+
+      .transition {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        background: #06776f;
+        transform-origin: left center;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="22"
+      data-width="1080"
+      data-height="1920"
+    >
+      <section id="scene-1" class="scene clip" data-start="0" data-duration="3.8" data-track-index="0">
+        <div class="pattern">
+          <div class="ring a"></div>
+          <div class="ring b"></div>
+          <div class="line one"></div>
+          <div class="line two"></div>
+        </div>
+        <div class="scene-content">
+          <div class="brand"><span class="mark">AI</span>AI 信息差中转站</div>
+          <div class="eyebrow">FOR CREATORS IN CHINA</div>
+          <h1>不想再为信息差付费？</h1>
+          <p class="lead">来这里自己找教程，自己实操。从网络准备到账号安全，一步一步把海外 AI 工具用起来。</p>
+        </div>
+      </section>
+
+      <div id="wipe-1" class="transition clip" data-start="3.65" data-duration="0.45" data-track-index="1"></div>
+
+      <section id="scene-2" class="scene clip" data-start="4" data-duration="3.8" data-track-index="0">
+        <div class="pattern">
+          <div class="ring a"></div>
+          <div class="line one"></div>
+        </div>
+        <div class="scene-content">
+          <div class="eyebrow">7 STEP ROADMAP</div>
+          <h2>7 步系统教程，照着做</h2>
+          <div class="mock-window">
+            <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>ai-info-gap / course-map</div>
+            <div class="course-list">
+              <div class="course-row"><span class="num">01</span><div><strong>网络准备</strong><span>理解风险提示和访问基础</span></div></div>
+              <div class="course-row"><span class="num">02</span><div><strong>海外 AI 账号</strong><span>注册资料、邮箱、双重验证</span></div></div>
+              <div class="course-row"><span class="num">03</span><div><strong>支付订阅</strong><span>成本、退款、账号稳定性</span></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="wipe-2" class="transition clip" data-start="7.65" data-duration="0.45" data-track-index="1"></div>
+
+      <section id="scene-3" class="scene clip" data-start="8" data-duration="3.6" data-track-index="0">
+        <div class="pattern">
+          <div class="ring b"></div>
+          <div class="line two"></div>
+        </div>
+        <div class="scene-content">
+          <div class="eyebrow">REAL TUTORIALS</div>
+          <h2>不是碎片信息，是能落地的帖子</h2>
+          <div class="post-stack">
+            <div class="post-row"><span class="post-icon">步</span><div><strong>步骤清晰</strong><span>准备条件、操作步骤、FAQ 一次看完</span></div></div>
+            <div class="post-row"><span class="post-icon">源</span><div><strong>来源标注</strong><span>外部资料只做摘要、短引用和出处说明</span></div></div>
+            <div class="post-row"><span class="post-icon">险</span><div><strong>风险提示</strong><span>科学上网、支付订阅、账号安全都有提醒</span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <div id="wipe-3" class="transition clip" data-start="11.45" data-duration="0.45" data-track-index="1"></div>
+
+      <section id="scene-4" class="scene clip" data-start="11.8" data-duration="3.7" data-track-index="0">
+        <div class="pattern">
+          <div class="ring a"></div>
+          <div class="ring b"></div>
+        </div>
+        <div class="scene-content">
+          <div class="eyebrow">BUILT-IN AI ASSISTANT</div>
+          <h2>内置 DeepSeek v4 Pro 问答</h2>
+          <div class="phone">
+            <div class="phone-head"><span>AI 问答</span><span>streaming...</span></div>
+            <div class="question">ChatGPT 新手应该先学什么？</div>
+            <div class="answer-card">
+              <span class="deepseek-badge">DeepSeek v4 Pro</span>
+              <strong>先从一个真实任务开始</strong>
+              <p>选题、文案、资料整理、账号安全和支付风险，可以直接问，系统会沉淀成可复用教程。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="wipe-4" class="transition clip" data-start="15.35" data-duration="0.45" data-track-index="1"></div>
+
+      <section id="scene-5" class="scene clip" data-start="15.8" data-duration="3.3" data-track-index="0">
+        <div class="pattern">
+          <div class="line one"></div>
+          <div class="line two"></div>
+        </div>
+        <div class="scene-content">
+          <div class="eyebrow">WHAT YOU CAN FIND</div>
+          <h2>少走弯路，把问题拆开做</h2>
+          <div class="tag-cloud">
+            <span class="tag">ChatGPT / Claude / Gemini</span>
+            <span class="tag">海外 AI 账号</span>
+            <span class="tag">支付订阅</span>
+            <span class="tag hot">Apple ID 土耳其地区设置</span>
+            <span class="tag">AI 创作工作流</span>
+            <span class="tag">风险避坑</span>
+          </div>
+          <p class="disclaimer">内容仅供信息学习，请遵守所在地法律法规、平台条款和数据安全要求。</p>
+        </div>
+      </section>
+
+      <div id="wipe-5" class="transition clip" data-start="18.95" data-duration="0.45" data-track-index="1"></div>
+
+      <section id="scene-6" class="scene clip" data-start="19.3" data-duration="2.7" data-track-index="0">
+        <div class="pattern">
+          <div class="ring a"></div>
+          <div class="ring b"></div>
+        </div>
+        <div class="scene-content">
+          <div class="cta-card">
+            <div class="brand"><span class="mark">AI</span>AI 信息差中转站</div>
+            <h2>自己查，自己做。</h2>
+            <p>如果你不想为信息差付费，就来网站看教程、问 AI、照着实操。</p>
+            <div class="cta-button">立即访问网站查看教程</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      gsap.set(".transition", { scaleX: 0 });
+      function animateFrom(selector, vars, position) {
+        if (document.querySelector(selector)) {
+          tl.from(selector, vars, position);
+        }
+      }
+
+      const sceneStarts = [0, 4, 8, 11.8, 15.8, 19.3];
+      sceneStarts.forEach((start, index) => {
+        const scene = `#scene-${index + 1}`;
+        animateFrom(`${scene} .eyebrow`, { opacity: 0, y: 34, duration: 0.52, ease: "power3.out" }, start + 0.18);
+        animateFrom(`${scene} h1, ${scene} h2`, { opacity: 0, y: 58, scale: 0.98, duration: 0.72, ease: "expo.out" }, start + 0.34);
+        animateFrom(`${scene} .lead, ${scene} .small-note, ${scene} .disclaimer`, { opacity: 0, y: 32, duration: 0.56, ease: "sine.out" }, start + 0.66);
+        animateFrom(`${scene} .brand`, { opacity: 0, x: -36, duration: 0.5, ease: "power2.out" }, start + 0.26);
+        animateFrom(`${scene} .mock-window, ${scene} .post-stack, ${scene} .phone, ${scene} .tag-cloud, ${scene} .cta-card`, { opacity: 0, y: 54, duration: 0.68, ease: "back.out(1.4)" }, start + 0.86);
+        animateFrom(`${scene} .course-row, ${scene} .post-row, ${scene} .tag`, { opacity: 0, x: 28, duration: 0.42, stagger: 0.08, ease: "power2.out" }, start + 1.12);
+        animateFrom(`${scene} .question`, { opacity: 0, x: 42, duration: 0.42, ease: "power4.out" }, start + 1.12);
+        animateFrom(`${scene} .answer-card`, { opacity: 0, y: 36, duration: 0.52, ease: "power3.out" }, start + 1.48);
+      });
+
+      [1, 2, 3, 4, 5].forEach((index) => {
+        const wipe = `#wipe-${index}`;
+        const t = [3.65, 7.65, 11.45, 15.35, 18.95][index - 1];
+        tl.fromTo(wipe, { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.22, ease: "power4.inOut" }, t);
+        tl.to(wipe, { scaleX: 0, transformOrigin: "right center", duration: 0.23, ease: "power4.inOut" }, t + 0.22);
+      });
+
+      tl.to("#scene-6 .cta-card", { opacity: 0, y: -28, duration: 0.55, ease: "sine.inOut" }, 21.35);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
