@@ -475,7 +475,9 @@ def create_post(payload: PostPayload) -> dict[str, Any]:
     try:
         return insert_post(data)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        import sys
+        print(f"[admin] create_post validation error: {exc}", file=sys.stderr, flush=True)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="输入数据不合法，请检查后重试") from exc
     except Exception as exc:
         if "UNIQUE constraint failed: posts.slug" in str(exc):
             raise HTTPException(
@@ -490,7 +492,9 @@ def replace_post(post_id: str, payload: PostPayload) -> dict[str, Any]:
     try:
         updated = update_post(post_id, payload.as_db_payload())
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        import sys
+        print(f"[admin] replace_post validation error: {exc}", file=sys.stderr, flush=True)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="输入数据不合法，请检查后重试") from exc
     except Exception as exc:
         if "UNIQUE constraint failed: posts.slug" in str(exc):
             raise HTTPException(
@@ -508,7 +512,9 @@ def change_status(post_id: str, payload: StatusPayload) -> dict[str, Any]:
     try:
         updated = update_post(post_id, {"status": payload.status})
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        import sys
+        print(f"[admin] change_status validation error: {exc}", file=sys.stderr, flush=True)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="输入数据不合法，请检查后重试") from exc
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     return updated
@@ -598,7 +604,9 @@ def admin_promote_question(payload: PromoteQuestionPayload) -> dict[str, Any]:
         post = insert_post(generated)
         promoted = promote_question(payload.question_id, post["id"])
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        import sys
+        print(f"[qa-promote] validation error: {exc}", file=sys.stderr, flush=True)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="输入数据不合法，请检查后重试") from exc
     except Exception as exc:
         import sys
         print(f"[qa-promote] 文章生成失败：{exc}", file=sys.stderr, flush=True)
