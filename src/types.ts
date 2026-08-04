@@ -35,9 +35,7 @@ export interface Post {
   updated_at: string;
 }
 
-export type PostPayload = Omit<Post, "id" | "published_at" | "updated_at" | "slug"> & {
-  slug?: string;
-};
+export type PostPayload = Omit<Post, "id" | "published_at" | "updated_at">;
 
 export interface PaginatedPosts {
   items: Post[];
@@ -54,18 +52,4 @@ export interface PostFilters {
   tag?: string;
   q?: string;
   status?: PostStatus | "all";
-}
-
-export interface QaQuestion {
-  id: number;
-  question: string;
-  answer: string;
-  topic_keyword: string;
-  ask_count: number;
-  is_promoted: boolean;
-  promoted_post_id: string | number | null;
-  promoted_post_slug?: string;
-  promoted_post_status?: PostStatus;
-  created_at: string;
-  updated_at: string;
 }

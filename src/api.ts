@@ -1,15 +1,4 @@
-import type { PaginatedPosts, Post, PostFilters, PostPayload, PostStatus, QaQuestion } from "./types";
-
-export interface PostNavItem {
-  slug: string;
-  title: string;
-  category: string;
-}
-
-export interface PostNav {
-  prev: PostNavItem | null;
-  next: PostNavItem | null;
-}
+import type { PaginatedPosts, Post, PostFilters, PostPayload, PostStatus } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const TOKEN_KEY = "ai-info-gap-admin-token";
@@ -75,8 +64,12 @@ export function fetchPost(slug: string): Promise<Post> {
   return request<Post>(`/api/posts/${encodeURIComponent(slug)}`);
 }
 
-export function fetchPostNav(slug: string): Promise<PostNav> {
-  return request<PostNav>(`/api/posts/nav/${encodeURIComponent(slug)}`);
+export function fetchCategories(): Promise<string[]> {
+  return request<string[]>("/api/categories");
+}
+
+export function fetchTags(): Promise<string[]> {
+  return request<string[]>("/api/tags");
 }
 
 export function fetchAdminPosts(filters: PostFilters = {}): Promise<PaginatedPosts> {
@@ -114,110 +107,5 @@ export function importUrlDraft(url: string): Promise<PostPayload> {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({ url })
-  });
-}
-
-export async function askQaQuestionStream(question: string, onStatus: (message: string) => void): Promise<QaQuestion> {
-  const response = await fetch(`${API_BASE}/api/qa/ask/stream`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ question })
-  });
-
-  if (!response.ok) {
-    let message = `请求失败：${response.status}`;
-    try {
-      const body = await response.json();
-      message = body.detail ?? message;
-    } catch {
-      // Keep status fallback.
-    }
-    throw new Error(message);
-  }
-
-  if (!response.body) {
-    throw new Error("浏览器不支持流式读取");
-  }
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const parts = buffer.split("\n\n");
-    buffer = parts.pop() ?? "";
-
-    for (const part of parts) {
-      const dataLine = part
-        .split("\n")
-        .find((line) => line.startsWith("data:"));
-      if (!dataLine) continue;
-
-      const payload = JSON.parse(dataLine.replace(/^data:\s*/, "")) as
-        | { type: "status"; message: string }
-        | { type: "error"; message: string }
-        | { type: "done"; data: QaQuestion };
-
-      if (payload.type === "status") {
-        onStatus(payload.message);
-      }
-      if (payload.type === "error") {
-        throw new Error(payload.message);
-      }
-      if (payload.type === "done") {
-        return payload.data;
-      }
-    }
-  }
-
-  throw new Error("AI 问答连接已结束，但没有返回结果");
-}
-
-export function fetchPopularQuestions(): Promise<QaQuestion[]> {
-  return request<QaQuestion[]>("/api/qa/popular");
-}
-
-export function fetchAdminQaQuestions(): Promise<QaQuestion[]> {
-  return request<QaQuestion[]>("/api/admin/qa/questions", {
-    headers: authHeaders()
-  });
-}
-
-export function promoteQaQuestion(questionId: number): Promise<{ question: QaQuestion; post: Post }> {
-  return request<{ question: QaQuestion; post: Post }>("/api/admin/qa/promote", {
-    method: "POST",
-    headers: authHeaders(),
-    body: JSON.stringify({ question_id: questionId })
-  });
-}
-
-export interface VisitsSummary {
-  pv: number;
-  uv: number;
-}
-
-export interface StatsData {
-  today: VisitsSummary;
-  yesterday: VisitsSummary;
-  this_week: VisitsSummary;
-  total: VisitsSummary;
-  daily: Array<{ date: string; pv: number; uv: number }>;
-}
-
-export function recordVisit(path: string): Promise<{ total_visits: number; today_visits: number }> {
-  return request("/api/visits", {
-    method: "POST",
-    body: JSON.stringify({ path })
-  });
-}
-
-export function fetchStats(): Promise<StatsData> {
-  return request<StatsData>("/api/admin/stats", {
-    headers: authHeaders()
   });
 }

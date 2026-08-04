@@ -15,7 +15,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from fastapi.testclient import TestClient  # noqa: E402
 
 from backend.app.main import app  # noqa: E402
-from backend.app.db import insert_question  # noqa: E402
 
 
 def assert_true(condition: bool, message: str) -> None:
@@ -80,26 +79,6 @@ def main() -> None:
         assert_true(searched.status_code == 200, "FTS search failed")
         assert_true(searched.json()["total"] >= 1, "FTS search should find seeded account content")
 
-        chinese_search = client.get("/api/posts?q=海外")
-        assert_true(chinese_search.status_code == 200, "Chinese LIKE search failed")
-        assert_true(chinese_search.json()["total"] >= 1, "Chinese search should find seeded overseas content")
-
-        first_slug = body["items"][0]["slug"]
-        nav = client.get(f"/api/posts/nav/{first_slug}")
-        assert_true(nav.status_code == 200, "post nav endpoint failed")
-        assert_true("prev" in nav.json() and "next" in nav.json(), "post nav should return prev and next keys")
-
-        cached_question = insert_question("ChatGPT 新手缓存测试问题", "## 缓存回答\n先明确任务，再学习提示词。", "AI工具")
-        cached_answer = client.post("/api/qa/ask", json={"question": "ChatGPT 新手缓存测试问题"})
-        assert_true(cached_answer.status_code == 200, f"cached QA failed: {cached_answer.text}")
-        assert_true(cached_answer.json()["id"] == cached_question["id"], "cached QA should return existing question")
-        assert_true(cached_answer.json()["ask_count"] == cached_question["ask_count"] + 1, "cached QA should increment ask_count")
-
-        streamed_answer = client.post("/api/qa/ask/stream", json={"question": "ChatGPT 新手缓存测试问题"})
-        assert_true(streamed_answer.status_code == 200, f"streamed cached QA failed: {streamed_answer.text}")
-        assert_true('"type": "done"' in streamed_answer.text, "streamed cached QA should return done event")
-        assert_true("缓存回答" in streamed_answer.text, "streamed cached QA should include cached answer")
-
         invalid_login = client.post("/api/admin/login", json={"username": "tester", "password": "wrong"})
         assert_true(invalid_login.status_code == 401, "invalid login should be rejected")
 
@@ -137,8 +116,6 @@ def main() -> None:
         assert_true(gone.status_code == 404, "archived post should be hidden publicly")
 
         before_import = client.get("/api/admin/posts", headers=headers).json()["total"]
-        blocked_import = client.post("/api/admin/import-url", json={"url": "http://127.0.0.1/private"}, headers=headers)
-        assert_true(blocked_import.status_code == 400, "URL import should reject loopback addresses")
         failed_import = client.post("/api/admin/import-url", json={"url": "https://127.0.0.1:1/nope"}, headers=headers)
         assert_true(failed_import.status_code == 400, "failed URL import should return 400")
         after_import = client.get("/api/admin/posts", headers=headers).json()["total"]
